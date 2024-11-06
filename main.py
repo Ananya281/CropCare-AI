@@ -1,8 +1,9 @@
 import streamlit as st
 import tensorflow as tf
 import numpy as np
+from PIL import Image
 
-# CSS for background image
+# CSS for background image and additional styling
 page_bg_img = """
 <style>
 body {
@@ -10,120 +11,106 @@ body {
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    color: white; /* Ensures text is visible against the background */
+    color: white;
+    font-family: Arial, sans-serif;
+}
+.sidebar .sidebar-content {
+    background: #1E2A38;
+}
+h1, h2, h3 {
+    color: #4CAF50;
+    font-weight: bold;
+}
+.stButton>button {
+    color: #FFFFFF;
+    background-color: #4CAF50;
+    border: None;
+    border-radius: 5px;
 }
 </style>
 """
-# Apply CSS for background
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
+# Load model function
 def model_prediction(test_image):
     model = tf.keras.models.load_model('trained_model.keras')
     image1 = tf.keras.preprocessing.image.load_img(test_image, target_size=(64, 64))
     input_arr1 = tf.keras.preprocessing.image.img_to_array(image1)
-    input_arr1 = np.array([input_arr1])  # CONVERT SINGLE IMAGE TO BATCH
+    input_arr1 = np.array([input_arr1])  # Convert single image to batch
     prediction1 = model.predict(input_arr1)
     result_index1 = np.argmax(prediction1)
     return result_index1
 
-# Sidebar
-st.sidebar.title("Dashboard")
-app_mode = st.sidebar.selectbox("Select Page", ["Home", "About", "Disease Recognition"])
+# Sidebar setup
+st.sidebar.title("🌿 Plant Health Dashboard")
+app_mode = st.sidebar.selectbox("Choose a Page", ["Home", "About", "Disease Recognition"])
 
-# Main Page
+# Main pages
 if app_mode == "Home":
-    st.header("PLANT DISEASE RECOGNITION SYSTEM")
-    image_path = "home_page.jpeg"  # You can update this to a relevant image for plant diseases
-    st.image(image_path, use_column_width=True)
+    st.title("🌱 Plant Disease Recognition System")
+    st.image("home_page.jpeg", use_column_width=True)
+    st.markdown("""
+    Welcome to the **Plant Disease Recognition System**! This tool helps you identify diseases in plant leaves quickly and accurately. 🌿
     
-    st.markdown("""
-    Welcome to the Plant Disease Recognition System! 🌱🦠
-
-    Our goal is to help you quickly and accurately identify plant diseases.
-    Simply upload an image of a plant leaf, and our system will analyze it for any diseases, 
-    providing valuable insights to ensure the health of your plants.
-    Let's protect our green friends together!
-    """)
-
-    st.markdown("---")
-    
-    st.markdown("""
-    ### How It Works
-    1. *Upload Image:* Go to the *Disease Recognition page* and upload an image of a plant leaf.
-    2. *Analysis:* Our advanced algorithms will analyze the image for potential diseases.
-    3. *Results:* Receive immediate results, including the type of disease and suggestions for treatment.
+    - **Upload an Image** of a plant leaf in the *Disease Recognition* section.
+    - Our system will analyze it for any diseases, providing insights to protect your plants.
     """)
 
     st.markdown("---")
 
+    st.header("🔍 How It Works")
     st.markdown("""
-    ### Why Choose Us?
-    - *Expertise:* Utilizing cutting-edge machine learning to provide accurate disease identification.
-    - *User-Friendly:* Designed for gardeners and farmers of all skill levels.
-    - *Fast and Reliable:* Get results in seconds, allowing you to act quickly to protect your plants.
+    1. **Upload Image**: Go to the *Disease Recognition* page and upload an image of a plant leaf.
+    2. **Analysis**: Our advanced model analyzes the image for potential diseases.
+    3. **Results**: Receive immediate results and suggestions to keep your plants healthy.
     """)
 
     st.markdown("---")
 
+    st.header("🌟 Why Choose Us?")
     st.markdown("""
-    ### Get Started
-    Click on the *Disease Recognition page* in the sidebar to upload an image and discover how our system can help maintain healthy plants!
+    - **Expertise**: Cutting-edge machine learning provides accurate results.
+    - **User-Friendly**: Ideal for gardeners and farmers.
+    - **Fast and Reliable**: Get insights quickly to act fast.
     """)
 
-    st.markdown("---")
-
-# About Project
 elif app_mode == "About":
-    st.header("About")
-
+    st.title("ℹ️ About the Project")
     st.markdown("---")
     
+    st.header("🗂 Dataset")
     st.markdown("""
-    ### Dataset
-    - This dataset consists of various plant leaves affected by different diseases, aimed at training our model for accurate recognition.
-    - It includes a wide range of plant types commonly found in gardens and farms, providing a comprehensive resource for developing disease-detection applications.
+    - Our dataset includes various plant diseases and healthy leaf images, allowing our model to distinguish between different conditions effectively.
+    - Categories include *Train*, *Test*, and *Validation* sets, which contain thousands of images to ensure accurate predictions.
     """)
 
     st.markdown("---")
 
-    st.markdown("""
-    ### Content
-    - The dataset is organized into three main folders:
-      1. *Train*: Contains 70295 images per disease category for training the model.
-      2. *Test*: Contains 33 images for evaluating model performance.
-      3. *Validation*: Contains 17572 images per category for fine-tuning and validation of model accuracy.
-    - Each folder has subdirectories, except test, for each type of disease, ensuring a structured approach to model training.
-    """)
-
-    st.markdown("---")
-
-# Prediction Page
 elif app_mode == "Disease Recognition":
-    st.header("Disease Recognition")
+    st.title("🧬 Disease Recognition")
+    
+    # File upload section
+    test_image = st.file_uploader("Upload an Image of a Plant Leaf 🌿", type=["jpg", "jpeg", "png"])
 
-    test_image = st.file_uploader("Choose an Image of a Plant Leaf:")
-    if test_image and st.button("Show Image"):
-        st.image(test_image, width=4, use_column_width=True)
+    if test_image:
+        st.image(test_image, caption="Uploaded Image", use_column_width=True)
 
-    if test_image and st.button("Predict"):
-        st.write("Our Prediction")
-        result_index = model_prediction(test_image)
-        
-        # Reading Labels
-        class_name = ['Apple__Apple_scab', 'Apple_Black_rot', 'Apple_Cedar_apple_rust', 'Apple__healthy',
-                      'Blueberry__healthy', 'Cherry(including_sour)_Powdery_mildew', 
-                      'Cherry_(including_sour)healthy', 'Corn(maize)_Cercospora_leaf_spot Gray_leaf_spot', 
-                      'Corn_(maize)Common_rust', 'Corn_(maize)_Northern_Leaf_Blight', 
-                      'Corn_(maize)healthy', 'Grape_Black_rot', 'Grape_Esca(Black_Measles)', 
-                      'Grape__Leaf_blight(Isariopsis_Leaf_Spot)', 'Grape___healthy', 
-                      'Orange__Haunglongbing(Citrus_greening)', 'Peach___Bacterial_spot',
-                      'Peach__healthy', 'Pepper,_bell_Bacterial_spot', 'Pepper,_bell__healthy', 
-                      'Potato__Early_blight', 'Potato_Late_blight', 'Potato__healthy', 
-                      'Raspberry__healthy', 'Soybean_healthy', 'Squash__Powdery_mildew', 
-                      'Strawberry__Leaf_scorch', 'Strawberry_healthy', 'Tomato__Bacterial_spot', 
-                      'Tomato__Early_blight', 'Tomato_Late_blight', 'Tomato__Leaf_Mold', 
-                      'Tomato__Septoria_leaf_spot', 'Tomato__Spider_mites Two-spotted_spider_mite', 
-                      'Tomato__Target_Spot', 'Tomato_Tomato_Yellow_Leaf_Curl_Virus', 'Tomato__Tomato_mosaic_virus',
-                      'Tomato___healthy']
-        
-        st.success("Model predicts the plant leaf is: {}".format(class_name[result_index]))
+        if st.button("Predict"):
+            with st.spinner("Analyzing..."):
+                result_index = model_prediction(test_image)
+
+            class_name = [
+                'Apple__Apple_scab', 'Apple_Black_rot', 'Apple_Cedar_apple_rust', 'Apple__healthy',
+                'Blueberry__healthy', 'Cherry Powdery_mildew', 'Cherry_healthy', 
+                'Corn_Cercospora_leaf_spot', 'Corn_Common_rust', 'Corn_Northern_Leaf_Blight', 
+                'Corn_healthy', 'Grape_Black_rot', 'Grape_Esca', 'Grape_Leaf_blight', 'Grape_healthy',
+                'Orange_Citrus_greening', 'Peach_Bacterial_spot', 'Peach_healthy', 
+                'Pepper_Bacterial_spot', 'Pepper_healthy', 'Potato_Early_blight', 'Potato_Late_blight', 
+                'Potato_healthy', 'Raspberry_healthy', 'Soybean_healthy', 'Squash_Powdery_mildew', 
+                'Strawberry_Leaf_scorch', 'Strawberry_healthy', 'Tomato_Bacterial_spot', 
+                'Tomato_Early_blight', 'Tomato_Late_blight', 'Tomato_Leaf_Mold', 
+                'Tomato_Septoria_leaf_spot', 'Tomato_Spider_mites', 'Tomato_Target_Spot', 
+                'Tomato_Yellow_Leaf_Curl_Virus', 'Tomato_mosaic_virus', 'Tomato_healthy'
+            ]
+            
+            st.success(f"🔍 Prediction: The plant leaf is identified as: **{class_name[result_index]}**")
